@@ -1,3 +1,5 @@
 rootProject.name = 'CatmullRomSplineHelper'
 
 include 'crshelper'
+include 'demo'
+

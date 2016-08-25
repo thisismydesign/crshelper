@@ -12,7 +12,7 @@
 hs_err_pid*
 
 .gradle
-/build/
+**/build/
 gradle
 
 # Ignore Gradle GUI config
@@ -73,3 +73,5 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+
+**/*.iml
