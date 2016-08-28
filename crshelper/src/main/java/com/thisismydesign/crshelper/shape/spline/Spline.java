@@ -20,7 +20,7 @@ public class Spline extends Shape {
     private SplinePoint intersection;
 
     private float length;
-    private float height = 5f;
+    private float height = 1f;
     private Vector2 beginPoint = new Vector2();
     private Vector2 endPoint = new Vector2();
 
@@ -89,13 +89,7 @@ public class Spline extends Shape {
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        shapeRenderer.setColor(Color.WHITE);
-        for (Vector2 v : controlPoints) {
-            shapeRenderer.circle(v.x, v.y, 5);
-        }
-
         shapeRenderer.setColor(Color.RED);
-
         for (Vector2 v : path.controlPoints) {
             shapeRenderer.circle(v.x, v.y, 5);
         }
@@ -105,6 +99,25 @@ public class Spline extends Shape {
         shapeRenderer.setColor(Color.GREEN);
         if (intersection != null)
             renderIntersection(shapeRenderer);
+    }
+
+    public void dumbRender(ShapeRenderer shapeRenderer) {
+        float precision = Precision.calculate(length);
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(Color.MAGENTA);
+
+        for (float t = 0f; t <= 1f; t+= precision ) {
+            Vector2 point = new Vector2();
+            path.valueAt(point, t);
+            shapeRenderer.circle(point.x, point.y, height);
+        }
+
+        shapeRenderer.end();
+
+        if (debug) {
+            renderDebug(shapeRenderer);
+        }
     }
 
     private void renderIntersection(ShapeRenderer shapeRenderer) {

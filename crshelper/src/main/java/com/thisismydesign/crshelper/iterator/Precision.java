@@ -6,7 +6,7 @@ public class Precision {
      * The lower the slower but the less likely for PositionAtRatioNotFoundException to occur
      * TODO take as argument in cnstr
      */
-    private static final float precisionOverLength = 1f;
+    private static final float precisionOverLength = 6f;
 
     // The higher the more inaccurate but less likely for PositionAtRatioNotFoundException to occur
     public static final float allowedErrorInPixels = 2f;
