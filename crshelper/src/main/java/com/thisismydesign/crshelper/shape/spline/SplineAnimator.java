@@ -71,17 +71,9 @@ public class SplineAnimator {
         int newLength = oldLength + 1;
         Vector2[] increasedCurrentControlPoints = new Vector2[newLength];
 
-        increasedCurrentControlPoints = cpy(this.currentControlPoints, increasedCurrentControlPoints);
-        increasedCurrentControlPoints[newLength - 1] = this.currentControlPoints[oldLength - 1];
+        System.arraycopy(currentControlPoints, 0, increasedCurrentControlPoints, 0, currentControlPoints.length);
+        increasedCurrentControlPoints[newLength - 1] = currentControlPoints[oldLength - 1];
 
         return increasedCurrentControlPoints;
-    }
-
-    private static Vector2[] cpy (Vector2[] from, Vector2[] to) {
-        //TODO array copy
-        for (int i = 0; i < from.length; ++i) {
-            to[i] = from[i];
-        }
-        return to;
     }
 }

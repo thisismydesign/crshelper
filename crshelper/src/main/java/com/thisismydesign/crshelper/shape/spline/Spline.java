@@ -145,9 +145,6 @@ public class Spline extends Shape {
 
     private void setIntersection(SplinePoint intersectionPoint) {
         this.intersection = intersectionPoint;
-        // TODO guessedColorChange value resets for some reason, cpy ctr needed
-//        guessedColorChange = new SplinePosition(SplinePosition.min(intersection.splinePosition, positionAtRatio.splinePosition));
-//        diffColorChange = SplinePosition.max(intersection.splinePosition, positionAtRatio.splinePosition);
     }
 
     private SplinePoint findPositionAtRatio(float ratio) {
