@@ -13,4 +13,5 @@ eclipse.project {
 dependencies {
     compile "com.badlogicgames.gdx:gdx:$gdxVersion"
     compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+    compile files('../../crshelper/build/libs/crshelper-1.0.jar')
 }
