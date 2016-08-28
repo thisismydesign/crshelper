@@ -15,8 +15,11 @@ public class CRSHelperDemo extends ApplicationAdapter {
 	private SpriteBatch batch;
 	private ShapeRenderer shapeRenderer;
 
-	Spline spline;
-	SplineAnimator splineAnimator;
+	Spline upperSpline;
+	SplineAnimator upperSplineAnimator;
+
+	Spline lowerSpline;
+	SplineAnimator lowerSplineAnimator;
 	
 	@Override
 	public void create () {
@@ -26,11 +29,20 @@ public class CRSHelperDemo extends ApplicationAdapter {
 
 		int screenHeight = Gdx.graphics.getHeight();
 		int screenWidth = Gdx.graphics.getWidth();
-		Vector2[] cps1 = new Frame(10, screenWidth, screenHeight).getRandomPoints();
-		Vector2[] cps2 = new Frame(10, screenWidth, screenHeight).getRandomPoints();
 
-		spline = new Spline(Color.CYAN, cps1);
-		splineAnimator = new SplineAnimator(spline, cps2);
+		Vector2 upperFrameStartPoint = new Vector2(0f, 0f);
+		Vector2 lowerFrameStartPoint = new Vector2(0f, screenHeight/2);
+
+		Vector2[] upperCPs1 = new Frame(10, screenWidth, screenHeight/2, upperFrameStartPoint).getRandomPoints();
+		Vector2[] upperCPs2 = new Frame(10, screenWidth, screenHeight/2, upperFrameStartPoint).getRandomPoints();
+		upperSpline = new Spline(Color.CYAN, upperCPs1);
+		upperSplineAnimator = new SplineAnimator(upperSpline, upperCPs2);
+
+		Vector2[] lowerCPs1 = new Frame(10, screenWidth, screenHeight/2, lowerFrameStartPoint).getRandomPoints();
+		Vector2[] lowerCPs2 = new Frame(10, screenWidth, screenHeight/2, lowerFrameStartPoint).getRandomPoints();
+
+		lowerSpline = new Spline(Color.CYAN, lowerCPs1);
+		lowerSplineAnimator = new SplineAnimator(lowerSpline, lowerCPs2);
 	}
 
 	@Override
@@ -38,8 +50,11 @@ public class CRSHelperDemo extends ApplicationAdapter {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		spline.render(shapeRenderer);
-		splineAnimator.animate(0.01f);
+		upperSpline.render(shapeRenderer);
+		upperSplineAnimator.animate(0.01f);
+
+		lowerSpline.render(shapeRenderer);
+		lowerSplineAnimator.animate(0.01f);
 	}
 
 	@Override
