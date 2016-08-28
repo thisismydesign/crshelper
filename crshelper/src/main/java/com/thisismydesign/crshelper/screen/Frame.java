@@ -11,12 +11,19 @@ public class Frame {
     private final int width;
     private final int height;
 
-    public Frame(int numberOfPoints, int width, int height) {
-        windowManager = new WindowManager(width, height, numberOfPoints - 2, new Vector2(0f, 0f));
+    private final Vector2 startPoint;
+
+    public Frame(int numberOfPoints, int width, int height, Vector2 startPoint) {
+        this.windowManager = new WindowManager(width, height, numberOfPoints - 2, startPoint);
+        this.startPoint = startPoint;
         this.width = width;
         this.height = height;
         this.numberOfPoints = numberOfPoints;
         this.maxPointRangeInPercent = getMaxPointRangeInPercent(numberOfPoints);
+    }
+
+    public Frame(int numberOfPoints, int width, int height) {
+        this(numberOfPoints, width, height, new Vector2(0f, 0f));
     }
 
     public Vector2[] getRandomPoints() {
@@ -25,9 +32,9 @@ public class Frame {
 
         // FIX POINTS
         // First point is in the left middle
-        points[0] = new Vector2(0, height / 2);
+        points[0] = new Vector2(startPoint.x, startPoint.y + height / 2);
         // Last point is in the right middle
-        points[numberOfPoints - 1] = new Vector2(width, height / 2);
+        points[numberOfPoints - 1] = new Vector2(startPoint.x + width, startPoint.y + height / 2);
 
         // Would be 0, but first point is fixed so the first window is skipped
         int i = 1;
