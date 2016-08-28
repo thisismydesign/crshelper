@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Color;
 
 import com.thisismydesign.crshelper.dto.*;
 import com.thisismydesign.crshelper.iterator.*;
-import com.thisismydesign.crshelper.shape.FlatColor;
 import com.thisismydesign.crshelper.shape.Intersectable;
 import com.thisismydesign.crshelper.shape.Shape;
 
@@ -17,16 +16,8 @@ public class Spline extends Shape {
     public CatmullRomSpline<Vector2> path;
 
     public Vector2 controlPoints[];
-    private Vector2 currentControlPoints[];
-    private float controlPointDiffs[];
-
-    private static enum RenderState {ANIMATE, ANIMATION_OVER, FINAL}
-    protected RenderState state;
-    private float animationTime;
 
     private SplinePoint intersection;
-    private SplinePosition guessedColorChange;
-    private SplinePosition diffColorChange;
 
     private float length;
     private float height = 5f;
@@ -36,19 +27,21 @@ public class Spline extends Shape {
     // TODO move
     private final boolean debug = true;
 
-    // TODO separate class for animating the spline
-    public Spline(Color color, Vector2[] controlPoints, Vector2[] currentControlPoints) {
+    public Spline(Color color, Vector2[] controlPoints) {
         super(color);
 
         this.controlPoints = controlPoints;
-        this.currentControlPoints = currentControlPoints != null ? currentControlPoints : controlPoints;
-        if (this.controlPoints.length > this.currentControlPoints.length)
-            this.duplicateLastControlPoint();
-        controlPointDiffs = getAnimationDiffs();
-        state = RenderState.ANIMATE;
+        this.path = new CatmullRomSpline<>(this.controlPoints, false);
 
-        this.path = new CatmullRomSpline<Vector2>(this.currentControlPoints, false);
+        updateCalculatedData();
+    }
 
+    public Vector2[] getControlPoints() {
+        return controlPoints.clone();
+    }
+
+    public void setControlPoints(Vector2[] controlPoints) {
+        this.controlPoints = controlPoints.clone();
         updateCalculatedData();
     }
 
@@ -82,9 +75,6 @@ public class Spline extends Shape {
         SplinePoint splinePoint;
 
         while ((splinePoint = iterator.getNext()) != null) {
-            if (intersection != null)
-                setColor(shapeRenderer, splinePoint.splinePosition);
-
             shapeRenderer.circle(splinePoint.point.x, splinePoint.point.y, height);
         }
 
@@ -104,8 +94,6 @@ public class Spline extends Shape {
             shapeRenderer.circle(v.x, v.y, 5);
         }
 
-        if (state != RenderState.FINAL)
-            updateCalculatedData();
         shapeRenderer.setColor(Color.RED);
 
         for (Vector2 v : path.controlPoints) {
@@ -117,37 +105,6 @@ public class Spline extends Shape {
         shapeRenderer.setColor(Color.GREEN);
         if (intersection != null)
             renderIntersection(shapeRenderer);
-    }
-
-    public void animate(float timeDelta) {
-        if (state == RenderState.ANIMATE) {
-            for (int i = 1; i < controlPoints.length - 1; ++i) {
-                Vector2 direction = (controlPoints[i].cpy().sub(currentControlPoints[i])).nor();
-                currentControlPoints[i] = currentControlPoints[i].add(direction.scl(controlPointDiffs[i] * timeDelta));
-            }
-            animationTime += timeDelta;
-            if (isAnimationFinished(timeDelta))
-                state = RenderState.ANIMATION_OVER;
-
-        } else if(state == RenderState.ANIMATION_OVER) {
-            path.set(controlPoints, false);
-            updateCalculatedData();
-            state = RenderState.FINAL;
-        }
-    }
-
-    private boolean isAnimationFinished(float lastTimeDelta) {
-        return animationTime >= 1f - lastTimeDelta;
-    }
-
-    private float[] getAnimationDiffs() {
-        float[] diffs = new float[currentControlPoints.length];
-
-        for(int i = 0; i < diffs.length; i++) {
-            diffs[i] = controlPoints[i].dst(currentControlPoints[i]);
-        }
-
-        return diffs;
     }
 
     private void renderIntersection(ShapeRenderer shapeRenderer) {
@@ -184,24 +141,6 @@ public class Spline extends Shape {
             }
         }
         return null;
-    }
-
-    private void setColor(ShapeRenderer shapeRenderer, SplinePosition pos) {
-
-        if (pos.compareTo(guessedColorChange) < 0) {
-            if (shapeRenderer.getColor() != FlatColor.PETER_RIVER)
-                shapeRenderer.setColor(FlatColor.PETER_RIVER);
-        }
-
-        else if (pos.compareTo(diffColorChange) > 0) {
-            if (shapeRenderer.getColor() != this.color)
-                shapeRenderer.setColor(this.color);
-        }
-
-        else {
-            if (shapeRenderer.getColor() != FlatColor.WISTERIA)
-                shapeRenderer.setColor(FlatColor.WISTERIA);
-        }
     }
 
     private void setIntersection(SplinePoint intersectionPoint) {
@@ -253,24 +192,6 @@ public class Spline extends Shape {
         length = path.approxLength(100);
         path.valueAt(beginPoint, 0f);
         path.valueAt(endPoint, 1f);
-    }
-
-    private void duplicateLastControlPoint() {
-        int newLength = controlPoints.length;
-        int oldLength = currentControlPoints.length;
-        Vector2[] tmp = new Vector2[newLength];
-
-        tmp = cpy(currentControlPoints, tmp);
-        tmp[newLength - 1] = currentControlPoints[oldLength - 1];
-
-        currentControlPoints = tmp;
-    }
-
-    private static Vector2[] cpy (Vector2[] from, Vector2[] to) {
-        for (int i = 0; i < from.length; ++i) {
-            to[i] = from[i];
-        }
-        return to;
     }
 
 }

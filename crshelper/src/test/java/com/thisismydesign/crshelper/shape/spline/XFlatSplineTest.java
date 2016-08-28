@@ -17,7 +17,7 @@ public class XFlatSplineTest {
         // TODO error with 3 points
         Frame frame = new Frame(5, 500, 500);
         Vector2[] controlPoints = frame.getRandomPoints();
-        spline = new Spline(Color.RED, controlPoints, controlPoints).path;
+        spline = new Spline(Color.RED, controlPoints).path;
     }
 
     @Test

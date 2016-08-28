@@ -34,7 +34,7 @@ public class SplineTest {
     public void initialize() {
         Frame frame = new Frame(5, width, height);
         Vector2[] controlPoints = frame.getRandomPoints();
-        spline = new Spline(Color.RED, controlPoints, controlPoints);
+        spline = new Spline(Color.RED, controlPoints);
         allowedErrorInPixels = Precision.allowedErrorInPixels;// * spline.controlPoints.length;
     }
 
@@ -51,7 +51,7 @@ public class SplineTest {
                 Frame frame = new Frame(i, width, height);
                 Vector2[] points = frame.getRandomPoints();
                 try {
-                    spline = new Spline(Color.RED, points, points);
+                    spline = new Spline(Color.RED, points);
                     spline.intersect(diagonalMiddleLine);
                 } catch (RuntimeException e) {
                     Assert.fail("RuntimeException thrown at " + i + " level: " + e.getMessage());
