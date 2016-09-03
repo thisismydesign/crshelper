@@ -18,6 +18,7 @@ public class SplineTest {
     private float allowedErrorInPixels;
 
     private final float delta = 0.01f;
+    private final int maxPointRangeInPercent = 50;
 
     private final static int width = 500;
     private final static int height = 500;
@@ -33,7 +34,7 @@ public class SplineTest {
     @Before
     public void initialize() {
         Frame frame = new Frame(5, width, height);
-        Vector2[] controlPoints = frame.getRandomPoints();
+        Vector2[] controlPoints = frame.getRandomPoints(maxPointRangeInPercent);
         spline = new Spline(Color.RED, controlPoints);
         allowedErrorInPixels = Precision.allowedErrorInPixels;// * spline.controlPoints.length;
     }
@@ -49,7 +50,7 @@ public class SplineTest {
         for(int j = 0; j < 10; j++) {
             for (int i = 3; i < 100; i += 10) {
                 Frame frame = new Frame(i, width, height);
-                Vector2[] points = frame.getRandomPoints();
+                Vector2[] points = frame.getRandomPoints(maxPointRangeInPercent);
                 try {
                     spline = new Spline(Color.RED, points);
                     spline.intersect(diagonalMiddleLine);

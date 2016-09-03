@@ -12,11 +12,13 @@ public class XFlatSplineTest {
 
     private CatmullRomSpline<Vector2> spline;
 
+    private final int maxPointRangeInPercent = 50;
+
     @Before
     public void initialize() {
         // TODO error with 3 points
         Frame frame = new Frame(5, 500, 500);
-        Vector2[] controlPoints = frame.getRandomPoints();
+        Vector2[] controlPoints = frame.getRandomPoints(maxPointRangeInPercent);
         spline = new Spline(Color.RED, controlPoints).path;
     }
 

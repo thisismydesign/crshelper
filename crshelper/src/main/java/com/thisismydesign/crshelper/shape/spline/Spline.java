@@ -30,7 +30,16 @@ public class Spline extends Shape {
     public Spline(Color color, Vector2[] controlPoints) {
         super(color);
 
-        this.controlPoints = controlPoints;
+        this.controlPoints = controlPoints.clone();
+        this.path = new CatmullRomSpline<>(this.controlPoints, false);
+
+        updateCalculatedData();
+    }
+
+    public Spline(Spline s) {
+        super(s.color);
+
+        this.controlPoints = s.getControlPoints();
         this.path = new CatmullRomSpline<>(this.controlPoints, false);
 
         updateCalculatedData();
@@ -120,12 +129,6 @@ public class Spline extends Shape {
         }
     }
 
-    private void renderIntersection(ShapeRenderer shapeRenderer) {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.circle(intersection.point.x, intersection.point.y, 10);
-        shapeRenderer.end();
-    }
-
     public Vector2 intersect(Intersectable intersectable) {
         if (intersection != null)
             return intersection.point;
@@ -133,6 +136,21 @@ public class Spline extends Shape {
             updateCalculatedData();
             return calculateIntersection(intersectable);
         }
+    }
+
+    public Spline move(Vector2 v) {
+        for (int i=0; i<controlPoints.length; i++) {
+            controlPoints[i] = new Vector2(controlPoints[i].x + v.x, controlPoints[i].y + v.y);
+        }
+        updateCalculatedData();
+
+        return this;
+    }
+
+    private void renderIntersection(ShapeRenderer shapeRenderer) {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.circle(intersection.point.x, intersection.point.y, 10);
+        shapeRenderer.end();
     }
 
     private Vector2 calculateIntersection(Intersectable intersectable) {

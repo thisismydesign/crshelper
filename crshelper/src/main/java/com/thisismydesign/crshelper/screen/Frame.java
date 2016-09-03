@@ -6,7 +6,6 @@ public class Frame {
     private WindowManager windowManager;
 
     private int numberOfPoints;
-    private int maxPointRangeInPercent;
 
     private final int width;
     private final int height;
@@ -19,14 +18,13 @@ public class Frame {
         this.width = width;
         this.height = height;
         this.numberOfPoints = numberOfPoints;
-        this.maxPointRangeInPercent = getMaxPointRangeInPercent(numberOfPoints);
     }
 
     public Frame(int numberOfPoints, int width, int height) {
         this(numberOfPoints, width, height, new Vector2(0f, 0f));
     }
 
-    public Vector2[] getRandomPoints() {
+    public Vector2[] getRandomPoints(int maxPointRangeInPercent) {
 
         Vector2[] points = new Vector2[numberOfPoints];
 

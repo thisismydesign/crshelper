@@ -33,16 +33,16 @@ public class CRSHelperDemo extends ApplicationAdapter {
 		Vector2 upperFrameStartPoint = new Vector2(0f, 0f);
 		Vector2 lowerFrameStartPoint = new Vector2(0f, screenHeight/2);
 
-		Vector2[] upperCPs1 = new Frame(20, screenWidth, screenHeight/2, upperFrameStartPoint).getRandomPoints();
-		Vector2[] upperCPs2 = new Frame(20, screenWidth, screenHeight/2, upperFrameStartPoint).getRandomPoints();
+		final int maxPointRangeInPercent = 80;
+
+		Vector2[] upperCPs1 = new Frame(10, screenWidth, screenHeight/2, upperFrameStartPoint).getRandomPoints(maxPointRangeInPercent);
+		Vector2[] upperCPs2 = new Frame(10, screenWidth, screenHeight/2, upperFrameStartPoint).getRandomPoints(maxPointRangeInPercent);
 		upperSpline = new Spline(Color.CYAN, upperCPs1);
 		upperSplineAnimator = new SplineAnimator(upperSpline, upperCPs2);
 
-		Vector2[] lowerCPs1 = new Frame(20, screenWidth, screenHeight/2, lowerFrameStartPoint).getRandomPoints();
-		Vector2[] lowerCPs2 = new Frame(20, screenWidth, screenHeight/2, lowerFrameStartPoint).getRandomPoints();
-
-		lowerSpline = new Spline(Color.CYAN, lowerCPs1);
-		lowerSplineAnimator = new SplineAnimator(lowerSpline, lowerCPs2);
+		lowerSpline = new Spline(upperSpline);
+		lowerSpline.move(lowerFrameStartPoint);
+		lowerSplineAnimator = new SplineAnimator(lowerSpline, new Spline(Color.CYAN, upperCPs2).move(lowerFrameStartPoint).getControlPoints());
 	}
 
 	@Override
