@@ -1,119 +1,122 @@
 package com.thisismydesign.crshelper.shape.spline;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
-import com.thisismydesign.crshelper.iterator.Precision;
+import com.thisismydesign.crshelper.SplineTestUtil;
 import com.thisismydesign.crshelper.iterator.SinglePointSplineIterator;
 import com.thisismydesign.crshelper.screen.Frame;
-import com.thisismydesign.crshelper.shape.Line;
 import org.junit.*;
+
+import static org.junit.Assert.*;
 
 public class SplineTest {
 
-    private static Line diagonalMiddleLine;
-    private static Line verticalMiddleLine;
-    private static Vector2 middlePointOfFrame;
-
     private Spline spline;
-    private float allowedErrorInPixels;
-
-    private final float delta = 0.01f;
-    private final int maxPointRangeInPercent = 50;
-
-    private final static int width = 500;
-    private final static int height = 500;
-
-    @BeforeClass
-    public static void init() {
-
-        middlePointOfFrame = new Vector2(width /2, height /2);
-        diagonalMiddleLine = new Line(Color.RED, new Vector2(0f,0f), new Vector2(width, height));
-        verticalMiddleLine = new Line(Color.RED, new Vector2(width /2, height /2), new Vector2(width /2, height /2));
-    }
 
     @Before
     public void initialize() {
-        Frame frame = new Frame(5, width, height);
-        Vector2[] controlPoints = frame.getRandomPoints(maxPointRangeInPercent);
-        spline = new Spline(Color.RED, controlPoints);
-        allowedErrorInPixels = Precision.allowedErrorInPixels;// * spline.controlPoints.length;
+        Frame frame = new Frame(10, SplineTestUtil.width, SplineTestUtil.height);
+        Vector2[] controlPoints = frame.getRandomPoints(SplineTestUtil.maxPointRangeInPercent);
+        spline = new Spline(controlPoints, SplineTestUtil.precision);
     }
 
     @Test
-    public void levelOneSpline_ShouldBeValid() {
-        XFlatSplineValidator validator = new XFlatSplineValidator(width, height, spline);
-        Assert.assertTrue(validator.isValid());
-    }
+    public void simpleLength_ShouldIgnoreFirstAndLastPoint() {
+        Vector2[] points = new Vector2[] {new Vector2(0f, 0f), new Vector2(0f, 100f), new Vector2(0f, 200f),
+                new Vector2(0f, 300f)};
+        spline = new Spline(points, SplineTestUtil.precision);
 
-    @Test
-    public void randomizedSpline_ShouldNotThrow_PointNotFoundException() {
-        for(int j = 0; j < 10; j++) {
-            for (int i = 3; i < 100; i += 10) {
-                Frame frame = new Frame(i, width, height);
-                Vector2[] points = frame.getRandomPoints(maxPointRangeInPercent);
-                try {
-                    spline = new Spline(Color.RED, points);
-                    spline.intersect(diagonalMiddleLine);
-                } catch (RuntimeException e) {
-                    Assert.fail("RuntimeException thrown at " + i + " level: " + e.getMessage());
-                }
-            }
-        }
-    }
-
-
-    @Test
-    @Ignore
-    public void sumOfSpanLengths_ShouldEqualTo_PathLength() {
-        SinglePointSplineIterator iterator = new SinglePointSplineIterator(spline.path);
+        SinglePointSplineIterator iterator = new SinglePointSplineIterator(spline.path, SplineTestUtil.precision);
         float length = 0f;
 
         for(int i = 0; i < spline.path.spanCount; i++) {
             length += iterator.calculateSpanLength(i);
         }
-        Assert.assertEquals(spline.path.approxLength(spline.path.spanCount*10), length, delta);
+
+        assertEquals(100f, length, SplineTestUtil.precision.getAllowedErrorInPixels());
     }
 
-    @Ignore
     @Test
-    // This should not fail... :/
+    public void simpleLengthWith3Points_ShouldBeZero() {
+        Vector2[] points = new Vector2[] {new Vector2(0f, 0f), new Vector2(0f, 100f), new Vector2(0f, 300f)};
+        spline = new Spline(points, SplineTestUtil.precision);
+
+        SinglePointSplineIterator iterator = new SinglePointSplineIterator(spline.path, SplineTestUtil.precision);
+        float length = 0f;
+
+        for(int i = 0; i < spline.path.spanCount; i++) {
+            length += iterator.calculateSpanLength(i);
+        }
+
+        assertEquals(0f, length, SplineTestUtil.precision.getAllowedErrorInPixels());
+    }
+
+    @Test
+    public void sumOfSpanLengthsViaIterator_ShouldEqualTo_PathLengthViaAPI() {
+        SinglePointSplineIterator iterator = new SinglePointSplineIterator(spline.path, SplineTestUtil.precision);
+        float length = 0f;
+
+        int spanCount = spline.path.spanCount;
+
+        for(int i = 0; i < spanCount; i++) {
+            length += iterator.calculateSpanLength(i);
+        }
+        assertEquals(spline.path.approxLength(100), length, SplineTestUtil.precision.getAllowedErrorInPixels()*spanCount);
+    }
+
+    @Test
+    @Ignore
+    public void randomizedSpline_ShouldNotThrow_PointNotFoundException() {
+        for(int j = 0; j < 10; j++) {
+            for (int i = 3; i < 100; i += 10) {
+                Frame frame = new Frame(i, SplineTestUtil.width, SplineTestUtil.height);
+                Vector2[] points = frame.getRandomPoints(SplineTestUtil.maxPointRangeInPercent);
+                try {
+                    spline = new Spline(points, SplineTestUtil.precision);
+                    spline.intersect(SplineTestUtil.diagonalMiddleLine);
+                } catch (RuntimeException e) {
+                    fail("RuntimeException thrown at " + i + " level: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    @Test
     public void splineLengthMeasuredWithForLoop_ShouldEqualTo_splineLengthMeasuredWithIterator() {
         float forLoopLength = 0f;
         float iteratorLength = 0f;
 
         Vector2 lastPosition = spline.path.valueAt(new Vector2(), 0f);
         Vector2 currentPosition;
+
         for(int span = 0; span < spline.path.spanCount; span++) {
-            for (float t = 0f; t <= 1f; t += 0.1) {
+
+            float samples = 100f;
+            for(int i=0; i<=samples; i++) {
+                float t = i/samples;
                 currentPosition = spline.path.valueAt(new Vector2(), span, t);
                 forLoopLength += lastPosition.dst(currentPosition);
                 lastPosition = currentPosition;
             }
         }
 
-        SinglePointSplineIterator iterator = new SinglePointSplineIterator(spline.path);
+        SinglePointSplineIterator iterator = new SinglePointSplineIterator(spline.path, SplineTestUtil.precision);
         for(int i = 0; i < spline.path.spanCount; i++) {
             iteratorLength += iterator.calculateSpanLength(i);
         }
 
-        Assert.assertEquals(forLoopLength, iteratorLength, delta);
+        assertEquals(forLoopLength, iteratorLength, SplineTestUtil.precision.getAllowedErrorInPixels());
     }
 
     @Test
-    public void levelOneSpline_ShouldBeInTheMiddleOfScreen() {
-        Vector2 intersection = spline.intersect(verticalMiddleLine);
-        Assert.assertNotEquals(intersection, null);
+    public void simpleSpline_ShouldBeIntersectable() {
+        Vector2 intersection = spline.intersect(SplineTestUtil.diagonalMiddleLine);
+        assertNotNull(intersection);
     }
 
     @Test
-    public void diagonalLine_ShouldCrossLevelOneSpline_InTheMiddleOfScreen() {
-        Vector2 intersection = spline.intersect(diagonalMiddleLine);
-        Assert.assertTrue(middlePointOfFrame.dst(intersection) < allowedErrorInPixels);
-    }
-
-    @Test
-    public void halfOfLevelOneSpline_ShouldBeInTheMiddleOfScreen() {
-        Vector2 intersection = spline.intersect(verticalMiddleLine);
-        Assert.assertTrue(middlePointOfFrame.dst(intersection) < allowedErrorInPixels);
+    public void diagonalLineAndSplineInTheMiddle_ShouldIntersectInTheMiddle() {
+        Vector2 intersection = SplineTestUtil.splineInTheMiddleOfScreen.intersect(SplineTestUtil.verticalMiddleLine);
+        assertEquals(SplineTestUtil.middlePointOfFrame.x, intersection.x, SplineTestUtil.precision.getAllowedErrorInPixels());
+        assertEquals(SplineTestUtil.middlePointOfFrame.y, intersection.y, SplineTestUtil.precision.getAllowedErrorInPixels());
     }
 }

@@ -9,10 +9,9 @@ public class XFlatSplineValidator {
 
     private final int screenWidth;
     private final int screenHeight;
-    // TODO this should be XFlatSpline
-    private final Spline spline;
+    private final XFlatSpline spline;
 
-    public XFlatSplineValidator(int screenWidth, int screenHeight, Spline spline) {
+    public XFlatSplineValidator(int screenWidth, int screenHeight, XFlatSpline spline) {
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
         this.spline = spline;
@@ -23,8 +22,8 @@ public class XFlatSplineValidator {
     }
 
     private boolean isPlayable() {
-        CatmullRomSpline<Vector2> temp = new CatmullRomSpline<Vector2>(spline.controlPoints, false);
-        DoublePointSplineIterator iterator = new DoublePointSplineIterator(temp);
+        CatmullRomSpline<Vector2> temp = new CatmullRomSpline<>(spline.controlPoints, false);
+        DoublePointSplineIterator iterator = new DoublePointSplineIterator(temp, spline.getPrecisionHelper());
         SplinePointPair splinePointPair;
 
         while ((splinePointPair = iterator.getNext()) != null) {

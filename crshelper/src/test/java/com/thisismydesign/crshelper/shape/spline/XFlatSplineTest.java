@@ -1,16 +1,16 @@
 package com.thisismydesign.crshelper.shape.spline;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.CatmullRomSpline;
 import com.badlogic.gdx.math.Vector2;
+import com.thisismydesign.crshelper.SplineTestUtil;
 import com.thisismydesign.crshelper.screen.Frame;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class XFlatSplineTest {
 
-    private CatmullRomSpline<Vector2> spline;
+    private XFlatSpline spline;
 
     private final int maxPointRangeInPercent = 50;
 
@@ -19,17 +19,35 @@ public class XFlatSplineTest {
         // TODO error with 3 points
         Frame frame = new Frame(5, 500, 500);
         Vector2[] controlPoints = frame.getRandomPoints(maxPointRangeInPercent);
-        spline = new Spline(Color.RED, controlPoints).path;
+        spline = new XFlatSpline(controlPoints, SplineTestUtil.precision);
     }
 
     @Test
     public void FirstPointOfSpline_ShouldBeInFirstSpan() {
-        Assert.assertEquals(0, XFlatSpline.getContainingSpan(spline, spline.valueAt(new Vector2(), 0f), 0, spline.spanCount - 1));
+        assertEquals(0, spline.getContainingSpan(spline.path.valueAt(new Vector2(), 0f), 0, spline.path.spanCount - 1));
     }
 
     @Test
     public void LastPointOfSpline_ShouldBeInLastSpan() {
-        Assert.assertEquals(spline.spanCount - 1, XFlatSpline.getContainingSpan(spline, spline.valueAt(new Vector2(), 1f), 0, spline.spanCount-1));
+        assertEquals(spline.path.spanCount - 1, spline.getContainingSpan(spline.path.valueAt(new Vector2(), 1f), 0, spline.path.spanCount - 1));
+    }
+
+    @Test
+    public void splineInTheMiddleOfScreen_ShouldBeIntersectedByVerticalLine() {
+        Vector2 intersection = SplineTestUtil.splineInTheMiddleOfScreen.intersect(SplineTestUtil.verticalMiddleLine);
+        assertNotEquals(intersection, null);
+    }
+
+    @Test
+    public void diagonalLine_ShouldCrossLevelOneSpline_InTheMiddleOfScreen() {
+        Vector2 intersection = SplineTestUtil.splineInTheMiddleOfScreen.intersect(SplineTestUtil.diagonalMiddleLine);
+        assertTrue(SplineTestUtil.middlePointOfFrame.dst(intersection) < SplineTestUtil.precision.getAllowedErrorInPixels());
+    }
+
+    @Test
+    public void halfOfLevelOneSpline_ShouldBeInTheMiddleOfScreen() {
+        Vector2 intersection = SplineTestUtil.splineInTheMiddleOfScreen.intersect(SplineTestUtil.verticalMiddleLine);
+        assertTrue(SplineTestUtil.middlePointOfFrame.dst(intersection) < SplineTestUtil.precision.getAllowedErrorInPixels());
     }
 
 }

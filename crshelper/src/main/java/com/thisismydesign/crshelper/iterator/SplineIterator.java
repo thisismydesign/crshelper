@@ -7,6 +7,7 @@ import com.thisismydesign.crshelper.dto.*;
 public class SplineIterator {
     protected CatmullRomSpline<Vector2> spline;
     protected SplinePoint currentPoint;
+    private Precision precision;
 
     protected SplinePosition startPos;
     protected SplinePosition endPos;
@@ -14,10 +15,11 @@ public class SplineIterator {
     boolean end;
 
     protected float spanLength;
-    protected float precision;
+    protected float currentPrecision;
 
-    public SplineIterator(CatmullRomSpline<Vector2> spline, SplinePosition startPos, SplinePosition endPos) {
+    public SplineIterator(CatmullRomSpline<Vector2> spline, SplinePosition startPos, SplinePosition endPos, Precision precision) {
         this.spline = spline;
+        this.precision = precision;
 
         this.startPos = startPos;
         this.endPos = endPos;
@@ -26,8 +28,8 @@ public class SplineIterator {
 
         updatePrecision();
     }
-    public SplineIterator(CatmullRomSpline<Vector2> spline) {
-        this(spline, new SplinePosition(0, 0f), new SplinePosition(spline.spanCount - 1, 1f));
+    public SplineIterator(CatmullRomSpline<Vector2> spline, Precision precision) {
+        this(spline, new SplinePosition(0, 0f), new SplinePosition(spline.spanCount - 1, 1f), precision);
     }
 
     protected SplinePoint getPoint(int s, float t) {
@@ -56,7 +58,7 @@ public class SplineIterator {
 
     private void updatePrecision() {
         spanLength = calculateSpanLength(currentPos.span);
-        precision = Precision.calculate(spanLength);
+        currentPrecision = precision.calculate(spanLength);
     }
 
     private void setEnd() {
@@ -69,12 +71,14 @@ public class SplineIterator {
         Vector2 prevPosition = spline.valueAt(new Vector2(), s, 0f);
         Vector2 currentPosition;
 
-        for (float t = 0f; t <= 1f; t += 0.1f) {
+        float samples = 100f;
+
+        for(int i=0; i<=samples; i++) {
+            float t = i/samples;
             currentPosition = spline.valueAt(new Vector2(), s, t);
             length += prevPosition.dst(currentPosition);
             prevPosition = currentPosition;
         }
-
         return length;
     }
 }

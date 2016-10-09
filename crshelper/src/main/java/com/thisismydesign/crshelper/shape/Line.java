@@ -11,27 +11,22 @@ public class Line extends Shape {
     private float width;
     private float length;
 
-    public Line(Color color) {
-        super(color);
-    }
-
-    public Line(Color color, Vector2 startPoint, Vector2 endPoint, float width) {
-        super(color);
+    public Line(Vector2 startPoint, Vector2 endPoint, float width) {
         this.startPoint = startPoint;
         this.endPoint = endPoint;
         this.width = width;
         length = startPoint.dst(endPoint);
     }
 
-    public Line(Color color, Vector2 startPoint, Vector2 endPoint) {
-        this(color, startPoint, endPoint, 5f);
+    public Line(Vector2 startPoint, Vector2 endPoint) {
+        this(startPoint, endPoint, 5f);
     }
 
     @Override
-    public void render(ShapeRenderer shapeRenderer) {
+    public void render(ShapeRenderer shapeRenderer, Color color) {
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(this.color);
+        shapeRenderer.setColor(color);
 
         shapeRenderer.rectLine(startPoint, endPoint, width);
 

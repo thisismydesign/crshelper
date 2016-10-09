@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.thisismydesign.crshelper.iterator.Precision;
 import com.thisismydesign.crshelper.screen.Frame;
 import com.thisismydesign.crshelper.shape.spline.Spline;
 import com.thisismydesign.crshelper.shape.spline.SplineAnimator;
@@ -14,6 +15,8 @@ import com.thisismydesign.crshelper.shape.spline.SplineAnimator;
 public class CRSHelperDemo extends ApplicationAdapter {
 	private SpriteBatch batch;
 	private ShapeRenderer shapeRenderer;
+
+	Precision precision;
 
 	Spline upperSpline;
 	SplineAnimator upperSplineAnimator;
@@ -23,26 +26,27 @@ public class CRSHelperDemo extends ApplicationAdapter {
 	
 	@Override
 	public void create () {
-
 		shapeRenderer = new ShapeRenderer();
 		batch = new SpriteBatch();
 
 		int screenHeight = Gdx.graphics.getHeight();
 		int screenWidth = Gdx.graphics.getWidth();
 
+		precision = new Precision(8f);
+
 		Vector2 upperFrameStartPoint = new Vector2(0f, 0f);
 		Vector2 lowerFrameStartPoint = new Vector2(0f, screenHeight/2);
 
-		final int maxPointRangeInPercent = 80;
+		final int maxPointRangeInPercent = 100;
 
 		Vector2[] upperCPs1 = new Frame(10, screenWidth, screenHeight/2, upperFrameStartPoint).getRandomPoints(maxPointRangeInPercent);
 		Vector2[] upperCPs2 = new Frame(10, screenWidth, screenHeight/2, upperFrameStartPoint).getRandomPoints(maxPointRangeInPercent);
-		upperSpline = new Spline(Color.CYAN, upperCPs1);
+		upperSpline = new Spline(upperCPs1, precision);
 		upperSplineAnimator = new SplineAnimator(upperSpline, upperCPs2);
 
 		lowerSpline = new Spline(upperSpline);
 		lowerSpline.move(lowerFrameStartPoint);
-		lowerSplineAnimator = new SplineAnimator(lowerSpline, new Spline(Color.CYAN, upperCPs2).move(lowerFrameStartPoint).getControlPoints());
+		lowerSplineAnimator = new SplineAnimator(lowerSpline, new Spline(upperCPs2, precision).move(lowerFrameStartPoint).getControlPoints());
 	}
 
 	@Override
@@ -50,7 +54,7 @@ public class CRSHelperDemo extends ApplicationAdapter {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		upperSpline.render(shapeRenderer);
+		upperSpline.render(shapeRenderer, Color.CYAN);
 		upperSplineAnimator.animate(0.01f);
 
 		lowerSpline.dumbRender(shapeRenderer);

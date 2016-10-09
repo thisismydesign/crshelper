@@ -1,39 +1,75 @@
 package com.thisismydesign.crshelper.shape.spline;
 
-import com.badlogic.gdx.math.CatmullRomSpline;
 import com.badlogic.gdx.math.Vector2;
 
 import com.thisismydesign.crshelper.dto.SplinePoint;
+import com.thisismydesign.crshelper.iterator.Precision;
+import com.thisismydesign.crshelper.shape.Intersectable;
 
-// TODO extends spline
-public class XFlatSpline {
+public class XFlatSpline extends Spline {
 
-    private XFlatSpline() {}
+    public XFlatSpline(Vector2[] controlPoints, Precision precisionHelper) {
+        super(controlPoints, precisionHelper);
+    }
 
-    public static int getContainingSpan(CatmullRomSpline<Vector2> spline, Vector2 point, int begin, int end) {
+    public Vector2 intersect(Intersectable intersectable) {
+        if (intersection != null)
+            return intersection.point;
+        else {
+            updateCalculatedData();
+            return calculateIntersection(intersectable);
+        }
+    }
+
+    private Vector2 calculateIntersection(Intersectable intersectable) {
+        SplinePoint intersect;
+        Vector2 linePos;
+        float linePrecision = precisionHelper.calculate(intersectable.getLength());
+        float splinePrecision = precisionHelper.calculate(length);
+
+        for (float t = 0f; t <= 1f; t += linePrecision) {
+            linePos = intersectable.valueAt(t);
+
+            if (isInXRange(linePos)) {
+                int span = getContainingSpan(linePos, 0, path.spanCount - 1);
+                intersect = getPointOnSpline(linePos, span, 0f, 1f, splinePrecision);
+                if (intersect != null) {
+                    this.setIntersection(intersect);
+                    return intersect.point;
+                }
+            }
+        }
+        return null;
+    }
+
+    private boolean isInXRange(Vector2 point) {
+        return beginPoint.x <= point.x && point.x <= endPoint.x;
+    }
+
+    public int getContainingSpan(Vector2 point, int begin, int end) {
         int middle = (int) Math.floor(begin + (end - begin / 2));
 
-        Vector2 firstPointOfMiddleSpan = spline.valueAt(new Vector2(), middle, 0f);
-        Vector2 lastPointOfMiddleSpan = spline.valueAt(new Vector2(), middle, 1f);
+        Vector2 firstPointOfMiddleSpan = path.valueAt(new Vector2(), middle, 0f);
+        Vector2 lastPointOfMiddleSpan = path.valueAt(new Vector2(), middle, 1f);
 
         if (point.x >= firstPointOfMiddleSpan.x && point.x <= lastPointOfMiddleSpan.x)
             return middle;
         else if (point.x < lastPointOfMiddleSpan.x)
-            return getContainingSpan(spline, point, begin, middle - 1);
+            return getContainingSpan(point, begin, middle - 1);
         else
-            return getContainingSpan(spline, point, middle + 1, end);
+            return getContainingSpan(point, middle + 1, end);
     }
 
-    // Recursive function that uses binary search on x coordinates to narrow possible points of spline that can match the given point
-    public static SplinePoint getPointOnSpline(CatmullRomSpline<Vector2> spline, Vector2 point, int span, float begin, float end, float precision) {
+//     Recursive function that uses binary search on x coordinates to narrow possible points of spline that can match the given point
+    private SplinePoint getPointOnSpline(Vector2 point, int span, float begin, float end, float precision) {
         float middle = begin + (end - begin) / 2;
-        Vector2 middlePoint = spline.valueAt(new Vector2(), span, middle);
+        Vector2 middlePoint = path.valueAt(new Vector2(), span, middle);
 
         if (Math.abs(point.x - middlePoint.x) <= precision)
-            return Spline.getPointOfSplineIfInRange(point, middlePoint, span, middle);
+            return getPointOfSplineIfInRange(point, middlePoint, span, middle);
         else if (point.x < middlePoint.x)
-            return getPointOnSpline(spline, point, span, begin, middle, precision);
+            return getPointOnSpline(point, span, begin, middle, precision);
         else
-            return getPointOnSpline(spline, point, span, middle, end, precision);
+            return getPointOnSpline(point, span, middle, end, precision);
     }
 }

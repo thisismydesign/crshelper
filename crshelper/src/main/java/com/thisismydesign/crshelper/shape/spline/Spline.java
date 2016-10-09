@@ -17,30 +17,34 @@ public class Spline extends Shape {
 
     public Vector2 controlPoints[];
 
-    private SplinePoint intersection;
+    protected SplinePoint intersection;
 
-    private float length;
+    protected float length;
     private float height = 1f;
-    private Vector2 beginPoint = new Vector2();
-    private Vector2 endPoint = new Vector2();
+    protected Vector2 beginPoint = new Vector2();
+    protected Vector2 endPoint = new Vector2();
+
+    protected Precision precisionHelper;
+
+    public Precision getPrecisionHelper() {
+        return precisionHelper;
+    }
 
     // TODO move
     private final boolean debug = true;
 
-    public Spline(Color color, Vector2[] controlPoints) {
-        super(color);
-
+    public Spline(Vector2[] controlPoints, Precision precisionHelper) {
         this.controlPoints = controlPoints.clone();
         this.path = new CatmullRomSpline<>(this.controlPoints, false);
+        this.precisionHelper = precisionHelper;
 
         updateCalculatedData();
     }
 
     public Spline(Spline s) {
-        super(s.color);
-
         this.controlPoints = s.getControlPoints();
         this.path = new CatmullRomSpline<>(this.controlPoints, false);
+        this.precisionHelper = s.getPrecisionHelper();
 
         updateCalculatedData();
     }
@@ -76,11 +80,11 @@ public class Spline extends Shape {
     }
 
     @Override
-    public void render(ShapeRenderer shapeRenderer) {
+    public void render(ShapeRenderer shapeRenderer, Color color) {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(this.color);
+        shapeRenderer.setColor(color);
 
-        SinglePointSplineIterator iterator = new SinglePointSplineIterator(path);
+        SinglePointSplineIterator iterator = new SinglePointSplineIterator(path, precisionHelper);
         SplinePoint splinePoint;
 
         while ((splinePoint = iterator.getNext()) != null) {
@@ -111,7 +115,7 @@ public class Spline extends Shape {
     }
 
     public void dumbRender(ShapeRenderer shapeRenderer) {
-        float precision = Precision.calculate(length);
+        float precision = precisionHelper.calculate(length);
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(Color.MAGENTA);
@@ -129,13 +133,68 @@ public class Spline extends Shape {
         }
     }
 
-    public Vector2 intersect(Intersectable intersectable) {
-        if (intersection != null)
-            return intersection.point;
-        else {
-            updateCalculatedData();
-            return calculateIntersection(intersectable);
+    public void dumbLineRender(ShapeRenderer shapeRenderer) {
+        float precision = precisionHelper.calculate(length);
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(Color.MAGENTA);
+        Vector2 previousPint = path.valueAt(new Vector2(), 0f);
+
+        for (float t = 0f; t <= 1f; t+= precision ) {
+            Vector2 point = new Vector2();
+            path.valueAt(point, t);
+            shapeRenderer.line(previousPint.x, previousPint.y,
+                    point.x, point.y);
+            previousPint = point;
         }
+
+        shapeRenderer.end();
+
+        if (debug) {
+            renderDebug(shapeRenderer);
+        }
+    }
+
+    public void lineRender(ShapeRenderer shapeRenderer, Color color) {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(color);
+
+        DoublePointSplineIterator iterator = new DoublePointSplineIterator(path, precisionHelper);
+        SplinePointPair splinePointPair;
+
+        while ((splinePointPair = iterator.getNext()) != null) {
+            shapeRenderer.line(splinePointPair.prevPoint.point.x, splinePointPair.prevPoint.point.y,
+                    splinePointPair.currentPoint.point.x, splinePointPair.currentPoint.point.y);
+//            splinePointPair.
+//            shapeRenderer.circle(splinePoint.point.x, splinePoint.point.y, height);
+        }
+
+        shapeRenderer.end();
+
+        if (debug) {
+            renderDebug(shapeRenderer);
+        }
+    }
+
+    public Vector2 intersect(Intersectable intersectable) {
+        SinglePointSplineIterator iterator;
+        SplinePoint splinePoint;
+        float intersectablePrecision = precisionHelper.calculate(intersectable.getLength());
+        SplinePoint intersection;
+
+        for (float t = 0f; t <= 1f; t+= intersectablePrecision ) {
+            Vector2 intersectablePoint = new Vector2();
+            path.valueAt(intersectablePoint, t);
+
+            iterator = new SinglePointSplineIterator(path, precisionHelper);
+
+            while ((splinePoint = iterator.getNext()) != null) {
+                intersection = getPointOfSplineIfInRange(intersectablePoint, splinePoint.point, splinePoint.splinePosition.span, splinePoint.splinePosition.t);
+                if (intersection != null) return intersection.point;
+            }
+        }
+
+        throw new RuntimeException("Intersection not found.");
     }
 
     public Spline move(Vector2 v) {
@@ -153,39 +212,18 @@ public class Spline extends Shape {
         shapeRenderer.end();
     }
 
-    private Vector2 calculateIntersection(Intersectable intersectable) {
-        SplinePoint intersect;
-        Vector2 linePos;
-        float linePrecision = Precision.calculate(intersectable.getLength());
-        float splinePrecision = Precision.calculate(this.length);
-
-        for (float t = 0f; t <= 1f; t += linePrecision) {
-            linePos = intersectable.valueAt(t);
-
-            if (isInXRange(linePos)) {
-                int span = XFlatSpline.getContainingSpan(path, linePos, 0, path.spanCount - 1);
-                intersect = XFlatSpline.getPointOnSpline(this.path, linePos, span, 0f, 1f, splinePrecision);
-                if (intersect != null) {
-                    this.setIntersection(intersect);
-                    return intersect.point;
-                }
-            }
-        }
-        return null;
-    }
-
-    private void setIntersection(SplinePoint intersectionPoint) {
+    protected void setIntersection(SplinePoint intersectionPoint) {
         this.intersection = intersectionPoint;
     }
 
     private SplinePoint findPositionAtRatio(float ratio) {
         float currentLength = 0f;
-        DoublePointSplineIterator iterator = new DoublePointSplineIterator(path);
+        DoublePointSplineIterator iterator = new DoublePointSplineIterator(path, precisionHelper);
         SplinePointPair splinePointPair;
 
         while ((splinePointPair = iterator.getNext()) != null) {
             currentLength += splinePointPair.prevPoint.point.dst(splinePointPair.currentPoint.point);
-            if (Math.abs(currentLength - (this.length * ratio)) <= Precision.allowedErrorInPixels) {
+            if (Math.abs(currentLength - (this.length * ratio)) <= precisionHelper.getAllowedErrorInPixels()) {
                 return splinePointPair.currentPoint;
             }
         }
@@ -193,12 +231,8 @@ public class Spline extends Shape {
         throw new RuntimeException("Position at ratio not found.");
     }
 
-    public static SplinePoint getPointOfSplineIfInRange(Vector2 point, Vector2 pointOfSpline, int span, float t) {
-        return point.dst(pointOfSpline) <= Precision.allowedErrorInPixels ? new SplinePoint(pointOfSpline, span, t) : null;
-    }
-
-    private boolean isInXRange(Vector2 point) {
-        return beginPoint.x <= point.x && point.x <= endPoint.x;
+    public SplinePoint getPointOfSplineIfInRange(Vector2 point, Vector2 pointOfSpline, int span, float t) {
+        return point.dst(pointOfSpline) <= precisionHelper.getAllowedErrorInPixels() ? new SplinePoint(pointOfSpline, span, t) : null;
     }
 
     private float dstOnSpline(SplinePosition a, SplinePosition b) {
@@ -206,7 +240,7 @@ public class Spline extends Shape {
         SplinePosition first = SplinePosition.min(a, b);
         SplinePosition second = SplinePosition.max(a, b);
 
-        DoublePointSplineIterator iterator = new DoublePointSplineIterator(path, first, second);
+        DoublePointSplineIterator iterator = new DoublePointSplineIterator(path, first, second, precisionHelper);
         SplinePointPair splinePointPair;
 
         while ((splinePointPair = iterator.getNext()) != null) {
@@ -216,7 +250,7 @@ public class Spline extends Shape {
         return dst;
     }
 
-    private void updateCalculatedData() {
+    protected void updateCalculatedData() {
         length = path.approxLength(100);
         path.valueAt(beginPoint, 0f);
         path.valueAt(endPoint, 1f);
