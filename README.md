@@ -16,11 +16,14 @@ The demo package contains an app showcasing these features.
 ## Usage
 
 To run the demo use the following gradle job:
+
 demo:desktop:run
+
 Be aware that the demo:core package is dependent on a built version of crshelper and looks for it in the default directory: "jar://$MODULE_DIR$/../../crshelper/build/libs/crshelper-1.0.jar"
 This has the side effect that you must re-build the crshelper project if you've modified it in order for modifications to take effect in the demo.
 
 To build the crshelper project use the following gradle job:
+
 crshelper:build
 
 ## Feedback
