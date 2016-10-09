@@ -3,7 +3,6 @@ package com.thisismydesign.crshelper.shape.spline;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.CatmullRomSpline;
 import com.badlogic.gdx.math.Vector2;
-// TODO do not hardcode colors
 import com.badlogic.gdx.graphics.Color;
 
 import com.thisismydesign.crshelper.dto.*;
@@ -20,7 +19,7 @@ public class Spline extends Shape {
     protected SplinePoint intersection;
 
     protected float length;
-    private float height = 1f;
+    protected float height = 1f;
     protected Vector2 beginPoint = new Vector2();
     protected Vector2 endPoint = new Vector2();
 
@@ -29,9 +28,6 @@ public class Spline extends Shape {
     public Precision getPrecisionHelper() {
         return precisionHelper;
     }
-
-    // TODO move
-    private final boolean debug = true;
 
     public Spline(Vector2[] controlPoints, Precision precisionHelper) {
         this.controlPoints = controlPoints.clone();
@@ -92,88 +88,6 @@ public class Spline extends Shape {
         }
 
         shapeRenderer.end();
-
-        if (debug) {
-            renderDebug(shapeRenderer);
-        }
-    }
-
-    public void renderDebug(ShapeRenderer shapeRenderer) {
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
-        shapeRenderer.setColor(Color.RED);
-        for (Vector2 v : path.controlPoints) {
-            shapeRenderer.circle(v.x, v.y, 5);
-        }
-
-        shapeRenderer.end();
-
-        shapeRenderer.setColor(Color.GREEN);
-        if (intersection != null)
-            renderIntersection(shapeRenderer);
-    }
-
-    public void dumbRender(ShapeRenderer shapeRenderer) {
-        float precision = precisionHelper.calculate(length);
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.MAGENTA);
-
-        for (float t = 0f; t <= 1f; t+= precision ) {
-            Vector2 point = new Vector2();
-            path.valueAt(point, t);
-            shapeRenderer.circle(point.x, point.y, height);
-        }
-
-        shapeRenderer.end();
-
-        if (debug) {
-            renderDebug(shapeRenderer);
-        }
-    }
-
-    public void dumbLineRender(ShapeRenderer shapeRenderer) {
-        float precision = precisionHelper.calculate(length);
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.MAGENTA);
-        Vector2 previousPint = path.valueAt(new Vector2(), 0f);
-
-        for (float t = 0f; t <= 1f; t+= precision ) {
-            Vector2 point = new Vector2();
-            path.valueAt(point, t);
-            shapeRenderer.line(previousPint.x, previousPint.y,
-                    point.x, point.y);
-            previousPint = point;
-        }
-
-        shapeRenderer.end();
-
-        if (debug) {
-            renderDebug(shapeRenderer);
-        }
-    }
-
-    public void lineRender(ShapeRenderer shapeRenderer, Color color) {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(color);
-
-        DoublePointSplineIterator iterator = new DoublePointSplineIterator(path, precisionHelper);
-        SplinePointPair splinePointPair;
-
-        while ((splinePointPair = iterator.getNext()) != null) {
-            shapeRenderer.line(splinePointPair.prevPoint.point.x, splinePointPair.prevPoint.point.y,
-                    splinePointPair.currentPoint.point.x, splinePointPair.currentPoint.point.y);
-//            splinePointPair.
-//            shapeRenderer.circle(splinePoint.point.x, splinePoint.point.y, height);
-        }
-
-        shapeRenderer.end();
-
-        if (debug) {
-            renderDebug(shapeRenderer);
-        }
     }
 
     public Vector2 intersect(Intersectable intersectable) {
@@ -206,7 +120,7 @@ public class Spline extends Shape {
         return this;
     }
 
-    private void renderIntersection(ShapeRenderer shapeRenderer) {
+    protected void renderIntersection(ShapeRenderer shapeRenderer) {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.circle(intersection.point.x, intersection.point.y, 10);
         shapeRenderer.end();

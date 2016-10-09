@@ -18,10 +18,10 @@ public class CRSHelperDemo extends ApplicationAdapter {
 
 	Precision precision;
 
-	Spline upperSpline;
+	DemoSpline upperSpline;
 	SplineAnimator upperSplineAnimator;
 
-	Spline lowerSpline;
+	DemoSpline lowerSpline;
 	SplineAnimator lowerSplineAnimator;
 	
 	@Override
@@ -41,10 +41,10 @@ public class CRSHelperDemo extends ApplicationAdapter {
 
 		Vector2[] upperCPs1 = new Frame(10, screenWidth, screenHeight/2, upperFrameStartPoint).getRandomPoints(maxPointRangeInPercent);
 		Vector2[] upperCPs2 = new Frame(10, screenWidth, screenHeight/2, upperFrameStartPoint).getRandomPoints(maxPointRangeInPercent);
-		upperSpline = new Spline(upperCPs1, precision);
+		upperSpline = new DemoSpline(upperCPs1, precision);
 		upperSplineAnimator = new SplineAnimator(upperSpline, upperCPs2);
 
-		lowerSpline = new Spline(upperSpline);
+		lowerSpline = new DemoSpline(upperSpline);
 		lowerSpline.move(lowerFrameStartPoint);
 		lowerSplineAnimator = new SplineAnimator(lowerSpline, new Spline(upperCPs2, precision).move(lowerFrameStartPoint).getControlPoints());
 	}
