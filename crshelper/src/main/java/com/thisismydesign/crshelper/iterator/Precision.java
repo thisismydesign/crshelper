@@ -11,7 +11,7 @@ public class Precision {
      */
     public Precision(float precisionOverLength) {
         this.precisionOverLength = precisionOverLength;
-        int allowedErrorPercentageByPrecision = 20;
+        int allowedErrorPercentageByPrecision = 70;
         this.allowedErrorInPixels = (allowedErrorPercentageByPrecision/100f) * precisionOverLength;
     }
 

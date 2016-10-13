@@ -95,16 +95,19 @@ public class Spline extends Shape {
         SplinePoint splinePoint;
         float intersectablePrecision = precisionHelper.calculate(intersectable.getLength());
         SplinePoint intersection;
+        Vector2 intersectablePoint;
 
         for (float t = 0f; t <= 1f; t+= intersectablePrecision ) {
-            Vector2 intersectablePoint = new Vector2();
-            path.valueAt(intersectablePoint, t);
+            intersectablePoint = intersectable.valueAt(t);
 
             iterator = new SinglePointSplineIterator(path, precisionHelper);
 
             while ((splinePoint = iterator.getNext()) != null) {
                 intersection = getPointOfSplineIfInRange(intersectablePoint, splinePoint.point, splinePoint.splinePosition.span, splinePoint.splinePosition.t);
-                if (intersection != null) return intersection.point;
+                if (intersection != null) {
+                    setIntersection(intersection);
+                    return intersection.point;
+                }
             }
         }
 
