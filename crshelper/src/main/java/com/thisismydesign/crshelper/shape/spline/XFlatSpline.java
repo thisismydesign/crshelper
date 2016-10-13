@@ -13,12 +13,8 @@ public class XFlatSpline extends Spline {
     }
 
     public Vector2 intersect(Intersectable intersectable) {
-        if (intersection != null)
-            return intersection.point;
-        else {
-            updateCalculatedData();
-            return calculateIntersection(intersectable);
-        }
+        updateCalculatedData();
+        return calculateIntersection(intersectable);
     }
 
     private Vector2 calculateIntersection(Intersectable intersectable) {
@@ -34,12 +30,13 @@ public class XFlatSpline extends Spline {
                 int span = getContainingSpan(linePos, 0, path.spanCount - 1);
                 intersect = getPointOnSpline(linePos, span, 0f, 1f, splinePrecision);
                 if (intersect != null) {
-                    this.setIntersection(intersect);
+                    setIntersection(intersect);
                     return intersect.point;
                 }
             }
         }
-        return null;
+
+        throw new RuntimeException("Intersection not found.");
     }
 
     private boolean isInXRange(Vector2 point) {
