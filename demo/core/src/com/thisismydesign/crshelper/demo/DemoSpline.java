@@ -6,7 +6,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.thisismydesign.crshelper.dto.SplinePointPair;
 import com.thisismydesign.crshelper.iterator.DoublePointSplineIterator;
 import com.thisismydesign.crshelper.iterator.Precision;
+import com.thisismydesign.crshelper.shape.Intersectable;
 import com.thisismydesign.crshelper.shape.spline.Spline;
+import com.thisismydesign.crshelper.shape.spline.XFlatSpline;
 
 public class DemoSpline extends Spline {
 
@@ -15,6 +17,10 @@ public class DemoSpline extends Spline {
     }
 
     public DemoSpline(DemoSpline s) {
+        super(s);
+    }
+
+    public DemoSpline(XFlatSpline s) {
         super(s);
     }
 
@@ -49,6 +55,9 @@ public class DemoSpline extends Spline {
         shapeRenderer.end();
 
         renderDebug(shapeRenderer);
+        if (intersection != null) {
+            renderIntersection(shapeRenderer);
+        }
     }
 
     public void dumbLineRender(ShapeRenderer shapeRenderer) {
@@ -86,5 +95,11 @@ public class DemoSpline extends Spline {
         shapeRenderer.end();
 
         renderDebug(shapeRenderer);
+    }
+
+    public long timedIntersect(Intersectable intersectable) {
+        long start = System.nanoTime();
+        intersect(intersectable);
+        return System.nanoTime() - start;
     }
 }
