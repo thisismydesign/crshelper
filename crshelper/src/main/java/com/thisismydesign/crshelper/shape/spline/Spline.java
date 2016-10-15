@@ -8,15 +8,18 @@ import com.badlogic.gdx.graphics.Color;
 import com.thisismydesign.crshelper.dto.*;
 import com.thisismydesign.crshelper.iterator.*;
 import com.thisismydesign.crshelper.shape.Intersectable;
+import com.thisismydesign.crshelper.shape.Line;
 import com.thisismydesign.crshelper.shape.Shape;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Spline extends Shape {
 
     public CatmullRomSpline<Vector2> path;
 
     public Vector2 controlPoints[];
-
-    protected SplinePoint intersection;
 
     protected float length;
     protected float height = 1f;
@@ -54,17 +57,6 @@ public class Spline extends Shape {
         updateCalculatedData();
     }
 
-    public float getHeight() {
-        return height;
-    }
-    public void setHeight(float height) {
-        this.height = height;
-    }
-
-    public SplinePoint getIntersection() {
-        return intersection;
-    }
-
     @Override
     public Vector2 valueAt(float t) {
         return path.valueAt(new Vector2(), t);
@@ -90,12 +82,13 @@ public class Spline extends Shape {
         shapeRenderer.end();
     }
 
-    public Vector2 intersect(Intersectable intersectable) {
+    public List<Vector2> intersect(Intersectable intersectable) {
+        List<Vector2> intersections = new ArrayList<>();
         SinglePointSplineIterator iterator;
         SplinePoint splinePoint;
+        Vector2 intersectablePoint;
         float intersectablePrecision = precisionHelper.calculate(intersectable.getLength());
         SplinePoint intersection;
-        Vector2 intersectablePoint;
 
         for (float t = 0f; t <= 1f; t+= intersectablePrecision ) {
             intersectablePoint = intersectable.valueAt(t);
@@ -105,13 +98,12 @@ public class Spline extends Shape {
             while ((splinePoint = iterator.getNext()) != null) {
                 intersection = getPointOfSplineIfInRange(intersectablePoint, splinePoint.point, splinePoint.splinePosition.span, splinePoint.splinePosition.t);
                 if (intersection != null) {
-                    setIntersection(intersection);
-                    return intersection.point;
+                    intersections.add(intersection.point);
                 }
             }
         }
 
-        throw new RuntimeException("Intersection not found.");
+        return intersections;
     }
 
     public Spline move(Vector2 v) {
@@ -121,16 +113,6 @@ public class Spline extends Shape {
         updateCalculatedData();
 
         return this;
-    }
-
-    protected void renderIntersection(ShapeRenderer shapeRenderer) {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.circle(intersection.point.x, intersection.point.y, 10);
-        shapeRenderer.end();
-    }
-
-    protected void setIntersection(SplinePoint intersectionPoint) {
-        this.intersection = intersectionPoint;
     }
 
     private SplinePoint findPositionAtRatio(float ratio) {
@@ -173,4 +155,15 @@ public class Spline extends Shape {
         path.valueAt(endPoint, 1f);
     }
 
+    public List<Vector2> intersect(Line line) {
+        List<Vector2> intersections = new ArrayList<>();
+        Span span;
+
+        for (int firstControlPointIndex = 0; firstControlPointIndex <= controlPoints.length - 4; firstControlPointIndex++) {
+            span = new Span(Arrays.copyOfRange(controlPoints, firstControlPointIndex, firstControlPointIndex + 4));
+            intersections.addAll(span.intersect(line));
+        }
+
+        return intersections;
+    }
 }

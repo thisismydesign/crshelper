@@ -6,18 +6,22 @@ import com.thisismydesign.crshelper.dto.SplinePoint;
 import com.thisismydesign.crshelper.iterator.Precision;
 import com.thisismydesign.crshelper.shape.Intersectable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class XFlatSpline extends Spline {
 
     public XFlatSpline(Vector2[] controlPoints, Precision precisionHelper) {
         super(controlPoints, precisionHelper);
     }
 
-    public Vector2 intersect(Intersectable intersectable) {
+    public List<Vector2> intersect(Intersectable intersectable) {
         updateCalculatedData();
         return calculateIntersection(intersectable);
     }
 
-    private Vector2 calculateIntersection(Intersectable intersectable) {
+    private List<Vector2> calculateIntersection(Intersectable intersectable) {
+        List<Vector2> intersections = new ArrayList<>();
         SplinePoint intersect;
         Vector2 linePos;
         float linePrecision = precisionHelper.calculate(intersectable.getLength());
@@ -30,13 +34,12 @@ public class XFlatSpline extends Spline {
                 int span = getContainingSpan(linePos, 0, path.spanCount - 1);
                 intersect = getPointOnSpline(linePos, span, 0f, 1f, splinePrecision);
                 if (intersect != null) {
-                    setIntersection(intersect);
-                    return intersect.point;
+                    intersections.add(intersect.point);
                 }
             }
         }
 
-        throw new RuntimeException("Intersection not found.");
+        return intersections;
     }
 
     private boolean isInXRange(Vector2 point) {

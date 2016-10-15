@@ -10,8 +10,8 @@ public class SplineTestUtil {
     public final static int height = 500;
 
     public final static Line diagonalMiddleLine = new Line(new Vector2(0f,0f), new Vector2(width, height));
-    public final static Line verticalMiddleLine = new Line(new Vector2(width /2, height /2), new Vector2(width /2, height /2));
-    public final static Vector2 middlePointOfFrame = new Vector2(width /2, height /2);
+    public final static Line verticalMiddleLine = new Line(new Vector2(width/2, height/4), new Vector2(width/2, height*3/4));
+    public final static Vector2 middlePointOfFrame = new Vector2(width/2, height/2);
 
     public final static int maxPointRangeInPercent = 50;
 

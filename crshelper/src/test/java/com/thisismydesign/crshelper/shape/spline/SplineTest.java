@@ -6,6 +6,8 @@ import com.thisismydesign.crshelper.iterator.SinglePointSplineIterator;
 import com.thisismydesign.crshelper.screen.Frame;
 import org.junit.*;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 public class SplineTest {
@@ -65,17 +67,13 @@ public class SplineTest {
 
     @Test
     @Ignore
-    public void randomizedSpline_ShouldNotThrow_PointNotFoundException() {
+    public void randomizedSpline_Intersection_ShouldBeFound() {
         for(int j = 0; j < 10; j++) {
             for (int i = 3; i < 100; i += 10) {
                 Frame frame = new Frame(i, SplineTestUtil.width, SplineTestUtil.height);
                 Vector2[] points = frame.getRandomPoints(SplineTestUtil.maxPointRangeInPercent);
-                try {
-                    spline = new Spline(points, SplineTestUtil.precision);
-                    spline.intersect(SplineTestUtil.diagonalMiddleLine);
-                } catch (RuntimeException e) {
-                    fail("RuntimeException thrown at " + i + " level: " + e.getMessage());
-                }
+                spline = new Spline(points, SplineTestUtil.precision);
+                assertNotEquals(0, spline.intersect(SplineTestUtil.diagonalMiddleLine).size());
             }
         }
     }
@@ -109,14 +107,14 @@ public class SplineTest {
 
     @Test
     public void simpleSpline_ShouldBeIntersectable() {
-        Vector2 intersection = spline.intersect(SplineTestUtil.diagonalMiddleLine);
-        assertNotNull(intersection);
+        assertNotEquals(0, spline.intersect(SplineTestUtil.diagonalMiddleLine).size());
     }
 
     @Test
     public void diagonalLineAndSplineInTheMiddle_ShouldIntersectInTheMiddle() {
-        Vector2 intersection = SplineTestUtil.splineInTheMiddleOfScreen.intersect(SplineTestUtil.verticalMiddleLine);
-        assertEquals(SplineTestUtil.middlePointOfFrame.x, intersection.x, SplineTestUtil.precision.getAllowedErrorInPixels());
-        assertEquals(SplineTestUtil.middlePointOfFrame.y, intersection.y, SplineTestUtil.precision.getAllowedErrorInPixels());
+        List<Vector2> intersections = SplineTestUtil.splineInTheMiddleOfScreen.intersect(SplineTestUtil.verticalMiddleLine);
+        assertNotEquals(0, intersections.size());
+        assertEquals(SplineTestUtil.middlePointOfFrame.x, intersections.get(0).x, SplineTestUtil.precision.getAllowedErrorInPixels());
+        assertEquals(SplineTestUtil.middlePointOfFrame.y, intersections.get(0).y, SplineTestUtil.precision.getAllowedErrorInPixels());
     }
 }

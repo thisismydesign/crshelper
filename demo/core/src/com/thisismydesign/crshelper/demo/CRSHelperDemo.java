@@ -14,6 +14,8 @@ import com.thisismydesign.crshelper.shape.Line;
 import com.thisismydesign.crshelper.shape.spline.Spline;
 import com.thisismydesign.crshelper.shape.spline.SplineAnimator;
 
+import java.util.List;
+
 public class CRSHelperDemo extends ApplicationAdapter {
 	private SpriteBatch batch;
 	private ShapeRenderer shapeRenderer;
@@ -28,8 +30,9 @@ public class CRSHelperDemo extends ApplicationAdapter {
 
 	Line upperMiddleLine;
 	Line lowerMiddleLine;
+	Line verticalMiddleLine;
+	Line diagonalMiddleLine;
 
-	double avgExecutionTimeRatio = 1;
 	final int sampleCount = 100;
 	
 	@Override
@@ -59,6 +62,8 @@ public class CRSHelperDemo extends ApplicationAdapter {
 
 		upperMiddleLine = new Line(new Vector2(screenWidth/2, screenHeight/2), new Vector2(screenWidth/2, screenHeight), 2);
 		lowerMiddleLine = new Line(new Vector2(screenWidth/2, screenHeight/2), new Vector2(screenWidth/2, 0), 2);
+		verticalMiddleLine = new Line(new Vector2(screenWidth /2, screenHeight /2), new Vector2(screenWidth /2, screenHeight /2), 2);
+		diagonalMiddleLine = new Line(new Vector2(0f,0f), new Vector2(screenWidth, screenHeight), 2);
 	}
 
 	@Override
@@ -73,16 +78,21 @@ public class CRSHelperDemo extends ApplicationAdapter {
 		upperSpline.dumbRender(shapeRenderer);
 		upperSplineAnimator.animate(0.001f);
 
-		upperMiddleLine.render(shapeRenderer, Color.MAGENTA);
-		lowerMiddleLine.render(shapeRenderer, Color.MAGENTA);
+		diagonalMiddleLine.render(shapeRenderer, Color.MAGENTA);
 
-		long xFlatIntersectTime = lowerSpline.timedIntersect(lowerMiddleLine);
-		long normalIntersectTime = upperSpline.timedIntersect(upperMiddleLine);
+		List<Vector2> intersections = lowerSpline.mathIntersect(diagonalMiddleLine);
+		for (Vector2 intersection : intersections) {
+			shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+			shapeRenderer.circle(intersection.x, intersection.y, 5);
+			shapeRenderer.end();
+		}
 
-		avgExecutionTimeRatio = approxRollingAverage(avgExecutionTimeRatio, normalIntersectTime/xFlatIntersectTime);
-
-		draw(String.format("%.2f times faster (measured using %s latest sample", avgExecutionTimeRatio, sampleCount),
-				new Vector2(30, 30));
+		intersections = upperSpline.intersect(diagonalMiddleLine);
+		for (Vector2 intersection : intersections) {
+			shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+			shapeRenderer.circle(intersection.x, intersection.y, 5);
+			shapeRenderer.end();
+		}
 	}
 
 	@Override

@@ -11,15 +11,27 @@ public class Line extends Shape {
     private float width;
     private float length;
 
+    private float a;
+    private float b;
+    private float c;
+
     public Line(Vector2 startPoint, Vector2 endPoint, float width) {
         this.startPoint = startPoint;
         this.endPoint = endPoint;
         this.width = width;
         length = startPoint.dst(endPoint);
+
+        a = startPoint.y - endPoint.y;
+        b = endPoint.x - startPoint.x;
+        c = (startPoint.x - endPoint.x)*startPoint.y + (endPoint.y - startPoint.y)*startPoint.x;
     }
 
     public Line(Vector2 startPoint, Vector2 endPoint) {
         this(startPoint, endPoint, 5f);
+    }
+
+    public boolean contains(Vector2 point, float delta) {
+        return Math.abs(a*point.x + b*point.y + c) <= delta;
     }
 
     @Override
@@ -54,5 +66,17 @@ public class Line extends Shape {
             return linePoint.y - width <= point.y && point.y <= linePoint.y + width;
         } else
             return false;
+    }
+
+    public float getA() {
+        return a;
+    }
+
+    public float getB() {
+        return b;
+    }
+
+    public float getC() {
+        return c;
     }
 }

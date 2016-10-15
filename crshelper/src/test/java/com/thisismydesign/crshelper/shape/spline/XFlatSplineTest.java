@@ -6,6 +6,8 @@ import com.thisismydesign.crshelper.screen.Frame;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 public class XFlatSplineTest {
@@ -34,20 +36,22 @@ public class XFlatSplineTest {
 
     @Test
     public void splineInTheMiddleOfScreen_ShouldBeIntersectedByVerticalLine() {
-        Vector2 intersection = SplineTestUtil.splineInTheMiddleOfScreen.intersect(SplineTestUtil.verticalMiddleLine);
-        assertNotEquals(intersection, null);
+        assertNotEquals(SplineTestUtil.splineInTheMiddleOfScreen.intersect(SplineTestUtil.verticalMiddleLine).size(), 0);
     }
 
     @Test
     public void diagonalLine_ShouldCrossLevelOneSpline_InTheMiddleOfScreen() {
-        Vector2 intersection = SplineTestUtil.splineInTheMiddleOfScreen.intersect(SplineTestUtil.diagonalMiddleLine);
-        assertTrue(SplineTestUtil.middlePointOfFrame.dst(intersection) < SplineTestUtil.precision.getAllowedErrorInPixels());
+        List<Vector2> intersections = SplineTestUtil.splineInTheMiddleOfScreen.intersect(SplineTestUtil.diagonalMiddleLine);
+        System.out.println(intersections);
+        assertNotEquals(0, intersections.size());
+        assertTrue(SplineTestUtil.middlePointOfFrame.dst(intersections.get(0)) < SplineTestUtil.precision.getAllowedErrorInPixels());
     }
 
     @Test
     public void halfOfLevelOneSpline_ShouldBeInTheMiddleOfScreen() {
-        Vector2 intersection = SplineTestUtil.splineInTheMiddleOfScreen.intersect(SplineTestUtil.verticalMiddleLine);
-        assertTrue(SplineTestUtil.middlePointOfFrame.dst(intersection) < SplineTestUtil.precision.getAllowedErrorInPixels());
+        List<Vector2> intersections = SplineTestUtil.splineInTheMiddleOfScreen.intersect(SplineTestUtil.verticalMiddleLine);
+        assertNotEquals(0, intersections.size());
+        assertTrue(SplineTestUtil.middlePointOfFrame.dst(intersections.get(0)) < SplineTestUtil.precision.getAllowedErrorInPixels());
     }
 
 }

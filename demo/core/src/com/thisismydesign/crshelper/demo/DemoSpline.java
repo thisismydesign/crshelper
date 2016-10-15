@@ -36,8 +36,6 @@ public class DemoSpline extends Spline {
         shapeRenderer.end();
 
         shapeRenderer.setColor(Color.GREEN);
-        if (intersection != null)
-            renderIntersection(shapeRenderer);
     }
 
     public void dumbRender(ShapeRenderer shapeRenderer) {
@@ -55,9 +53,6 @@ public class DemoSpline extends Spline {
         shapeRenderer.end();
 
         renderDebug(shapeRenderer);
-        if (intersection != null) {
-            renderIntersection(shapeRenderer);
-        }
     }
 
     public void dumbLineRender(ShapeRenderer shapeRenderer) {
