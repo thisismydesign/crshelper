@@ -25,8 +25,6 @@ public class DemoXFlatSpline extends XFlatSpline {
         shapeRenderer.end();
 
         shapeRenderer.setColor(Color.GREEN);
-        if (intersection != null)
-            renderIntersection(shapeRenderer);
     }
 
     public long timedIntersect(Intersectable intersectable) {

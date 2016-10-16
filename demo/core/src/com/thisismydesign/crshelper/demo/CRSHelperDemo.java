@@ -51,8 +51,8 @@ public class CRSHelperDemo extends ApplicationAdapter {
 		Vector2 upperFrameStartPoint = new Vector2(0f, 0f);
 		Vector2 lowerFrameStartPoint = new Vector2(0f, screenHeight/2);
 
-		Vector2[] upperCPs1 = new Frame(10, screenWidth, screenHeight/2, upperFrameStartPoint).getRandomPoints(maxPointRangeInPercent);
-		Vector2[] upperCPs2 = new Frame(10, screenWidth, screenHeight/2, upperFrameStartPoint).getRandomPoints(maxPointRangeInPercent);
+		Vector2[] upperCPs1 = new Frame(10, screenWidth, screenHeight, upperFrameStartPoint).getRandomPoints(maxPointRangeInPercent);
+		Vector2[] upperCPs2 = new Frame(10, screenWidth, screenHeight, upperFrameStartPoint).getRandomPoints(maxPointRangeInPercent);
 		lowerSpline = new DemoXFlatSpline(upperCPs1, precision);
 		lowerSplineAnimator = new SplineAnimator(lowerSpline, upperCPs2);
 
@@ -80,7 +80,7 @@ public class CRSHelperDemo extends ApplicationAdapter {
 
 		diagonalMiddleLine.render(shapeRenderer, Color.MAGENTA);
 
-		List<Vector2> intersections = lowerSpline.mathIntersect(diagonalMiddleLine);
+		List<Vector2> intersections = lowerSpline.intersect(diagonalMiddleLine);
 		for (Vector2 intersection : intersections) {
 			shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 			shapeRenderer.circle(intersection.x, intersection.y, 5);
