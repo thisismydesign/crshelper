@@ -24,8 +24,6 @@ public class Span {
 
     public List<Vector2> intersect(Line line) {
         List<Vector2> intersections = new ArrayList<>();
-        Vector2 splinePoint;
-        float accuracy = 1f;
 
         double c0 = line.getA()*getA0(controlPoints) + line.getB()*getB0(controlPoints) + line.getC();
         double c1 = line.getA()*getA1(controlPoints) + line.getB()*getB1(controlPoints);
@@ -35,16 +33,13 @@ public class Span {
         equation.solve(c3, c2, c1, c0);
 
         if(equation.x1 >=0 && equation.x1 <= 1) {
-            splinePoint = spline.valueAt(new Vector2(), (float)equation.x1);
-            if (line.contains(splinePoint, accuracy)) intersections.add(splinePoint);
+            intersections.add(spline.valueAt(new Vector2(), (float)equation.x1));
         }
         if (equation.x2 >=0 && equation.x2 <= 1) {
-            splinePoint = spline.valueAt(new Vector2(), (float)equation.x2);
-            if (line.contains(splinePoint, accuracy)) intersections.add(splinePoint);
+            intersections.add(spline.valueAt(new Vector2(), (float)equation.x2));
         }
         if (equation.x3 >=0 && equation.x3 <= 1) {
-            splinePoint = spline.valueAt(new Vector2(), (float)equation.x3);
-            if (line.contains(splinePoint, accuracy)) intersections.add(splinePoint);
+            intersections.add(spline.valueAt(new Vector2(), (float)equation.x3));
         }
 
         return intersections;
