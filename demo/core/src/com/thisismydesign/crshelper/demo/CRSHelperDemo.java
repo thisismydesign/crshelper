@@ -65,11 +65,11 @@ public class CRSHelperDemo extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		upperSpline.dumbRender(shapeRenderer);
-		upperSplineAnimator.animate(0.001f);
+		upperSplineAnimator.animate(0.003f);
 
 		lowerSpline.render(shapeRenderer, Color.CYAN);
 		lowerSpline.renderDebug(shapeRenderer);
-		lowerSplineAnimator.animate(0.001f);
+		lowerSplineAnimator.animate(0.003f);
 
 		diagonalMiddleLine.render(shapeRenderer, Color.MAGENTA);
 
